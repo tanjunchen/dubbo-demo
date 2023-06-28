@@ -1,0 +1,21 @@
+apiVersion: metaprotocol.aeraki.io/v1alpha1
+kind: MetaRouter
+metadata:
+  name: test-metaprotocol-dubbo-route
+spec:
+  hosts:
+    - dubbo-sample-provider.default.svc.cluster.local
+  routes:
+    - name: v1
+      match:
+        attributes:
+          interface:
+            exact: org.apache.dubbo.samples.basic.api.DemoService
+          method:
+            exact: sayHello
+          foo:
+            exact: bar
+      route:
+        - destination:
+            host: dubbo-sample-provider.default.svc.cluster.local
+            subset: v1

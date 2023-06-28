@@ -45,7 +45,7 @@ public class BasicConsumer {
                 try {
                     Thread.sleep(5000);
                     DemoService demoService = (DemoService) context.getBean("demoService");
-                    String hello = demoService.sayHello("Aeraki");
+                    String hello = demoService.sayHello("Istio-Dubbo");
                     System.out.println(hello);
                 } catch (Exception ex) {
                     ex.printStackTrace();

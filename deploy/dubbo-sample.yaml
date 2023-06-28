@@ -1,0 +1,156 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dubbo-resolve-config
+data:
+  dubbo-resolve.properties: |-
+    org.apache.dubbo.samples.basic.api.DemoService=dubbo://dubbo-sample-provider:20880
+    org.apache.dubbo.samples.basic.api.TestService=dubbo://dubbo-sample-provider:20880
+    org.apache.dubbo.samples.basic.api.ComplexService=dubbo://dubbo-sample-provider:20880
+    org.apache.dubbo.samples.basic.api.SecondService=dubbo://dubbo-sample-second-provider:20880
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dubbo-sample-provider-v1
+  labels:
+    app: dubbo-sample-provider
+spec:
+  selector:
+    matchLabels:
+      app: dubbo-sample-provider
+  replicas: 1
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/bootstrapOverride: aeraki-bootstrap-config
+      labels:
+        app: dubbo-sample-provider
+        version: v1
+        service_group: user
+    spec:
+      containers:
+        - name: dubbo-sample-provider
+          image: registry.baidubce.com/csm/dubbo-sample-provider:latest
+          ports:
+            - containerPort: 20880
+          volumeMounts:
+            - name: dubbo-resolve-config
+              mountPath: /dubbo-resolve.properties
+              subPath: dubbo-resolve.properties
+              readOnly: true
+      volumes:
+        - name: dubbo-resolve-config
+          configMap:
+            name: dubbo-resolve-config
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dubbo-sample-provider-v2
+  labels:
+    app: dubbo-sample-provider
+spec:
+  selector:
+    matchLabels:
+      app: dubbo-sample-provider
+  replicas: 1
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/bootstrapOverride: aeraki-bootstrap-config
+      labels:
+        app: dubbo-sample-provider
+        version: v2
+        service_group: batchjob
+    spec:
+      containers:
+        - name: dubbo-sample-provider
+          image: registry.baidubce.com/csm/dubbo-sample-provider:latest
+          ports:
+            - containerPort: 20880
+          volumeMounts:
+            - name: dubbo-resolve-config
+              mountPath: /dubbo-resolve.properties
+              subPath: dubbo-resolve.properties
+              readOnly: true
+      volumes:
+        - name: dubbo-resolve-config
+          configMap:
+            name: dubbo-resolve-config
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dubbo-sample-second-provider
+  labels:
+    app: dubbo-sample-second-provider
+spec:
+  selector:
+    matchLabels:
+      app: dubbo-sample-second-provider
+  replicas: 1
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/bootstrapOverride: aeraki-bootstrap-config
+      labels:
+        app: dubbo-sample-second-provider
+        version: v2
+        service_group: batchjob
+    spec:
+      containers:
+        - name: dubbo-sample-second-provider
+          image: registry.baidubce.com/csm/dubbo-sample-second-provider
+          ports:
+            - containerPort: 20880
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dubbo-sample-consumer
+  labels:
+    app: dubbo-sample-consumer
+spec:
+  selector:
+    matchLabels:
+      app: dubbo-sample-consumer
+  replicas: 1
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/bootstrapOverride: aeraki-bootstrap-config
+      labels:
+        app: dubbo-sample-consumer
+    spec:
+      containers:
+        - name: dubbo-sample-consumer
+          image: registry.baidubce.com/csm/dubbo-sample-consumer:latest
+          env:
+            - name: mode
+              value: demo
+          ports:
+            - containerPort: 9009
+          volumeMounts:
+            - name: dubbo-resolve-config
+              mountPath: /dubbo-resolve.properties
+              subPath: dubbo-resolve.properties
+              readOnly: true
+      volumes:
+        - name: dubbo-resolve-config
+          configMap:
+            name: dubbo-resolve-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dubbo-sample-provider
+spec:
+  selector:
+    app: dubbo-sample-provider
+  ports:
+    - name: tcp-metaprotocol-dubbo
+      protocol: TCP
+      port: 20880
+      targetPort: 20880
+

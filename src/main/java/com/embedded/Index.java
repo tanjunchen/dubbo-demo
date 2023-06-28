@@ -50,7 +50,7 @@ public class Index {
         try{
             DemoService demoService = (DemoService) context.getBean("demoService");
             RpcContext.getContext().setAttachment("foo", "bar");
-            String hello = demoService.sayHello("Aeraki");
+            String hello = demoService.sayHello("Istio-Dubbo");
             System.out.println(hello);
             return Response.status(200).entity(hello).build();
         }
@@ -65,7 +65,7 @@ public class Index {
     public Response  test() {
         try{
             TestService testService = (TestService ) context.getBean("testService");
-            String hello = testService.sayHello("Aeraki");
+            String hello = testService.sayHello("Istio-Dubbo");
             System.out.println(hello);
             return Response.status(200).entity(hello).build();
         }
@@ -80,7 +80,7 @@ public class Index {
     public Response  testComplexService() {
         try{
             ComplexService complexService = (ComplexService) context.getBean("complexService");
-            String hello = complexService.sayHello("Aeraki");
+            String hello = complexService.sayHello("Istio-Dubbo");
             System.out.println(hello);
             return Response.status(200).entity(hello).build();
         }

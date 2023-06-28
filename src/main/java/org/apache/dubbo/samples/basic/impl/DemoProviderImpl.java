@@ -64,7 +64,7 @@ public class DemoProviderImpl implements DemoService,TestService, ComplexService
         // call the scenod service to form a tracing chain
         try{
             SecondService secondDemoService = (SecondService) context.getBean("secondService");
-            secondDemoService.sayHello("Aeraki");
+            secondDemoService.sayHello("Istio-Dubbo");
         }
         catch(Exception ex){
             ex.printStackTrace();
